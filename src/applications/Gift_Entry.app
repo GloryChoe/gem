@@ -9,8 +9,19 @@
         <type>Flexipage</type>
         <pageOrSobjectType>Opportunity</pageOrSobjectType>
     </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <comment>Action override updated by Lightning App Builder during activation.</comment>
+        <content>Gift_Batch</content>
+        <formFactor>Large</formFactor>
+        <skipRecordTypeSelect>false</skipRecordTypeSelect>
+        <type>Flexipage</type>
+        <pageOrSobjectType>npsp__DataImportBatch__c</pageOrSobjectType>
+    </actionOverrides>
     <description>The Salesforce.org Gift Entry Manager (GEM) application</description>
     <formFactors>Large</formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
     <label>Gift Entry Manager</label>
     <navType>Standard</navType>
     <tabs>standard-home</tabs>
@@ -19,6 +30,6 @@
     <tabs>standard-Opportunity</tabs>
     <tabs>standard-report</tabs>
     <tabs>Single_Gift_Entry</tabs>
-    <tabs>npsp__Batch_Gift_Entry</tabs>
+    <tabs>npsp__DataImportBatch__c</tabs>
     <uiType>Lightning</uiType>
 </CustomApplication>

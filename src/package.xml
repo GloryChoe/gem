@@ -38,6 +38,7 @@
         <members>giftEntryForm</members>
         <members>giftFormRelated</members>
         <members>giftFormRelatedRow</members>
+        <members>giftList</members>
         <members>giftPaymentScheduler</members>
         <members>giftPicklist</members>
         <members>giftRelatedAllocation</members>
@@ -142,6 +143,7 @@
         <name>CustomTab</name>
     </types>
     <types>
+        <members>Gift_Batch</members>
         <members>Opportunity_Record_Page</members>
         <name>FlexiPage</name>
     </types>

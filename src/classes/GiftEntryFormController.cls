@@ -853,4 +853,39 @@ public with sharing class GiftEntryFormController {
     }
 
     public class FieldNotMappedException extends Exception {}
+
+    public class GiftBatchModel {
+        @AuraEnabled public Id batchId {get;set;}
+        @AuraEnabled public npsp__DataImportBatch__c diBatch {get;set;}
+        @AuraEnabled public List<npsp__DataImport__c> diList {get;set;}
+
+        public GiftBatchModel() {
+            this.diBatch = new npsp__DataImportBatch__c();
+            this.diList = new List<npsp__DataImport__c>();
+        }
+
+        public GiftBatchModel(Id batchId) {
+            this();
+            this.batchId = batchId;
+        }
+    }
+
+    @AuraEnabled
+    public static GiftBatchModel initBatch(Id batchId) {
+        GiftBatchModel giftModel = new GiftBatchModel(batchId);
+
+        if(batchId != null){
+            String allDIFields = UTIL_Describe.getAllFieldsQueryStringFromObject('npsp__DataImport__c');
+            giftModel.diList = 
+                Database.query('SELECT '+ String.escapeSingleQuotes(allDIFields) +' FROM npsp__DataImport__c WHERE npsp__NPSP_Data_Import_Batch__c =: batchId');
+            System.debug(giftModel.diList);
+        } else {
+            System.debug('*** No Batch'); 
+        }
+        
+        //giftModel = getDonationRecords(giftModel);
+        return giftModel;
+    }
+
+
 }
