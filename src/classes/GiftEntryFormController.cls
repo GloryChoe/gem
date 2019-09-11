@@ -73,9 +73,22 @@ public with sharing class GiftEntryFormController {
     }
 
     /******************************************************************************************************
-    * @description String helper property for getClosedWonStageMap() method.
+    * @description Map helper property for getClosedWonStageMap() method.
     *******************************************************************************************************/
     private static Map<String, Boolean> closedWonStageMap = null;
+
+    /******************************************************************************************************
+    * @description Map helper property for getOpportunityLookupMap() method.
+    *******************************************************************************************************/
+    private static Map<String, String> opportunityLookupMap {
+        get {
+            if (opportunityLookupMap == null) {
+                setOpportunityLookupMap();
+            }
+            return opportunityLookupMap;
+        }
+        private set;
+    }
 
     /******************************************************************************************************
     * @description Build a the Map that includes all closed/won Opportunity Stage
@@ -106,6 +119,20 @@ public with sharing class GiftEntryFormController {
         diMappings.put('npsp__Contact1Imported__c'.toLowerCase(), 'npsp__Primary_Contact__c');
         return diMappings;
   	}
+
+    /******************************************************************************************************
+    * @description Build a the Map that includes all closed/won Opportunity Stage
+    * @return Map<String, Boolean> the Map that includes all closed/won Opportunity Stage
+    *******************************************************************************************************/
+    public static void setOpportunityLookupMap() {
+        opportunityLookupMap = new Map<String, String>();
+        Schema.DescribeSObjectResult oppDesc = UTIL_Describe.getObjectDescribe('Opportunity');
+        for(Schema.ChildRelationship cr : oppDesc.getChildRelationships()){
+            String relatedObjectName = cr.getChildSObject().getDescribe().getName();
+            String oppLookupField = cr.getField().getDescribe().getName();
+            opportunityLookupMap.put(relatedObjectName, oppLookupField);
+        }
+    }
 
     @AuraEnabled
     public static GiftFormModel initClass(Id oppId) {
@@ -430,42 +457,6 @@ public with sharing class GiftEntryFormController {
                 throw returnAuraException('No Opportunity was created or matched');
             }
 
-            if(giftModel.allocs != null && !giftModel.allocs.isEmpty()){
-                for(npsp__Allocation__c a : giftModel.allocs){
-                    a.npsp__Opportunity__c = oppId;
-                }
-                UTIL_CrudFLS.checkUpsert(giftModel.allocs);
-                saveResults.addAll(Database.upsert(giftModel.allocs));
-            }
-
-            if(giftModel.payments != null && !giftModel.payments.isEmpty()) {
-                for(npe01__OppPayment__c p : giftModel.payments) {
-                    if(p.Id == null) {
-                        p.npe01__Opportunity__c = oppId;
-                    }
-                }
-                UTIL_CrudFLS.checkUpsert(giftModel.payments);
-                saveResults.addAll(Database.upsert(giftModel.payments));
-            }
-
-            if(giftModel.partialCredits != null && !giftModel.partialCredits.isEmpty()){
-                for(npsp__Partial_Soft_Credit__c c : giftModel.partialCredits){
-                    if(c.Id == null){
-                        c.npsp__Opportunity__c = oppId;
-                    }
-                }
-                UTIL_CrudFLS.checkUpsert(giftModel.partialCredits);
-                saveResults.addAll(Database.upsert(giftModel.partialCredits));
-            }
-
-            for(Database.UpsertResult result : saveResults) {
-                if(!result.isSuccess()) {
-                    DmlException dmlException = new DmlException();
-                    dmlException.setMessage(result.getErrors()[0].getMessage());
-                    throw dmlException;
-                }
-            }
-
             return giftModel;
 
         } catch(Exception e) {
@@ -556,6 +547,7 @@ public with sharing class GiftEntryFormController {
                     'accountObject' => Schema.SObjectType.Account.getLabel(),
                     'accountLookup' => Schema.SObjectType.npsp__DataImport__c.fields.npsp__Account1Imported__c.getName(),
                     'batchIdField' => Schema.SObjectType.npsp__DataImport__c.fields.npsp__NPSP_Data_Import_Batch__c.getName(),
+                    'bdiBatchClass' => 'npsp__BDI_DataImport',
                     'contactLookup' => Schema.SObjectType.npsp__DataImport__c.fields.npsp__Contact1Imported__c.getName(),
                     'contactObject' => Schema.SObjectType.Contact.getLabel(),
                     'dataImportObject' => Schema.SObjectType.npsp__DataImport__c.getName(),
@@ -574,6 +566,7 @@ public with sharing class GiftEntryFormController {
                     'paymentScheduledDate' => Schema.SObjectType.npe01__OppPayment__c.fields.npe01__Scheduled_Date__c.getLabel(),
                     'paymentImportedLookupField' => Schema.SObjectType.npsp__DataImport__c.fields.npsp__PaymentImported__c.getName(),
                     'paymentImportedStatusField' => Schema.SObjectType.npsp__DataImport__c.fields.npsp__PaymentImportStatus__c.getName(),
+                    'postProcessJsonField' => UTIL_Namespace.StrTokenNSPrefix('Post_Process_Object_JSON__c'),
                     'requireTotalMatch' => Schema.SObjectType.npsp__DataImportBatch__c.fields.npsp__RequireTotalMatch__c.getName(),
                     'userSelectedNewOpp' => System.Label.npsp.bdiMatchedByUserNewOpp,
                     'userSelectedNewPayment' => System.Label.npsp.bdiMatchedApplyNewPayment,
@@ -716,6 +709,9 @@ public with sharing class GiftEntryFormController {
             Database.query('SELECT '+ String.escapeSingleQuotes(allDIFields) +' FROM npsp__DataImport__c WHERE Id = :diObjId');
 
         npsp.BDI_DataImport_API.processDataImportRecords(diSettings, listDI, dryRunMode);
+        if(!dryRunMode){
+            processJSONList(listDI);
+        }
     }
 
     // Not currently used, but useful for processing a large number of DataImport objects
@@ -776,6 +772,65 @@ public with sharing class GiftEntryFormController {
     public static List<String> getFieldsFromCustomizableLayout() {
         SGE_GiftEntryService.Layout layout = SGE_GiftEntryService.readOpportunityLayout();
         return layout.getFieldNames();
+    }
+
+    /*******************************************************************************************************
+    * @description For a list of DataImport objects with Post Process JSON values filled in,
+    * process those lists to add related objects
+    * @param listDi List of DataImport objects that will have Post_Process_Object_JSON__c processed
+    * @return void
+    */
+    public static void processJSONList(List<npsp__DataImport__c> listDi) {
+        // List<SObject> objsToUpsert = new List<SObject>();
+        List<List<SObject>> objsToUpsert = new List<List<SObject>>();
+
+        Set<Id> diIdSet = new Set<Id>();
+        // Select the fields we need
+        for(npsp__DataImport__c di : listDi) {
+            diIdSet.add(di.Id);
+        }
+
+        List<npsp__DataImport__c> listDiWithFields = [
+                SELECT Id, Post_Process_Object_JSON__c, npsp__DonationImported__c
+                FROM npsp__DataImport__c
+                WHERE Id IN :diIdSet
+        ];
+
+        List<SObject> thisList;
+        Map<String, Object> objNameToObjList;
+        for(npsp__DataImport__c di : listDiWithFields) {
+            if(di.Post_Process_Object_JSON__c == null) {
+                continue;
+            }
+            String oppId = di.npsp__DonationImported__c;
+            thisList = new List<SObject>();
+            objNameToObjList = (Map<String, Object>)JSON.deserializeUntyped(di.Post_Process_Object_JSON__c);
+            // For each objet type included, add the list
+            for(String objName : objNameToObjList.keySet()) {
+                Object objList = objNameToObjList.get(objName);
+                if(objList != null) {
+                    String objListString = JSON.serialize(objList);
+                    System.debug(objListString); 
+                    Type listType = Type.forName('List<' + objName + '>');
+                    thisList = (List<SObject>)JSON.deserialize(objListString, listType);
+                    String lookupField = opportunityLookupMap.get(objName);
+                    for(SObject relObj : thisList){
+                        relObj.put(lookupField, oppId);
+                    }
+                    System.debug(JSON.serialize(thisList)); 
+                    if(!thisList.isEmpty()){
+                        objsToUpsert.add(thisList);
+                    }
+                }
+            }
+        }
+
+        if(!objsToUpsert.isEmpty()) {
+            for(List<SObject> objList : objsToUpsert){
+                UTIL_CrudFLS.checkUpsert(objList);
+                upsert objList;
+            }
+        }
     }
 
     /*******************************************************************************************************
@@ -877,7 +932,8 @@ public with sharing class GiftEntryFormController {
         if(batchId != null){
             String allDIFields = UTIL_Describe.getAllFieldsQueryStringFromObject('npsp__DataImport__c');
             giftModel.diList = 
-                Database.query('SELECT '+ String.escapeSingleQuotes(allDIFields) +' FROM npsp__DataImport__c WHERE npsp__NPSP_Data_Import_Batch__c =: batchId');
+                Database.query('SELECT '+ String.escapeSingleQuotes(allDIFields) 
+                    +' FROM npsp__DataImport__c WHERE (npsp__NPSP_Data_Import_Batch__c =: batchId AND npsp__DonationImported__c = null)');
             System.debug(giftModel.diList);
         } else {
             System.debug('*** No Batch'); 

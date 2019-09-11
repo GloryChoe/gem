@@ -211,6 +211,13 @@
         event.fire();
     },
     handleSaveGift: function(component) {
+
+        let curDiIndex = component.get('v.diIndexChosen');
+        if(curDiIndex > -1){
+            console.log('Saving DI record: ' + curDiIndex); 
+            return;
+        }
+
         component.set('v.showSpinner', true);
         var action = component.get('c.saveGift');
         var giftModelString = component.get('v.giftModelString');
@@ -439,6 +446,30 @@
         // Update the form to edit the selected Opportunity
         this.getDonationInformation(component, oppId);
     },
+    mapDiToOpp: function(component, diUpperCase, opp) {
+        // keys - data import fields
+        // values - opportunity fields
+        const fieldMap = component.get('v.objectFieldData.diToOppFieldMap');
+
+        var theKeys = Object.getOwnPropertyNames(diUpperCase);
+        let di = {};
+        theKeys.forEach(function(key) {
+            di[key.toLowerCase()] = diUpperCase[key];
+        });
+
+        for(let field in fieldMap) {
+            const oppField = fieldMap[field];
+            let diValue = di[field];
+
+            if(diValue instanceof Array) {
+                // Lookup values are stored as arrays for some reason
+                diValue = diValue[0];
+                opp[oppField] = diValue;
+            } else if(diValue !== null && typeof diValue !== 'undefined') {
+                opp[oppField] = diValue;
+            }
+        }
+    },
     mapOppToDi: function(component, di, opp) {
         // keys - data import fields
         // values - opportunity fields
@@ -512,12 +543,25 @@
     fillJsonField: function(component) {
         const relatedCmp = this.getChildComponents(component, 'giftFormRelated');
         let allRowsValid = true;
+        let relatedJSON = {};
 
         // First process the related objects
         for(let i=0; i < relatedCmp.length; i++) {
             // Need to get variable name for each of these to know where to map the return
             const jsonResp = relatedCmp[i].handleJsonUpdate();
-            allRowsValid = allRowsValid && jsonResp;
+            let respObj = this.proxyToObj(jsonResp);
+            if(respObj){
+                // Set the new relatedJSON type, if there is one
+                for(var key in respObj) {
+                    if (respObj.hasOwnProperty(key)) {
+                        relatedJSON[key] = respObj[key];
+                    }
+                }
+            }
+            console.log(relatedJSON); 
+            allRowsValid = allRowsValid && (jsonResp != false);
+            console.log('allRowsValid:');
+            console.log(allRowsValid); 
         }
 
         let giftModel = component.get('v.giftModel');
@@ -532,6 +576,9 @@
         // Map fields from Opportunity to DataImport
         // This is done to avoid referencing GEM namespace fields in markup
         this.mapOppToDi(component, di, mergedOpp);
+        let bdiLabels = component.get('v.bdiLabels');
+        di[bdiLabels.postProcessJsonField] = JSON.stringify(relatedJSON);
+        console.log(di); 
         giftModel['di'] = di;
         // Lookup values are converted from array to ID during mapOppToDi, so we need to update
         giftModel['opp'] = opp;

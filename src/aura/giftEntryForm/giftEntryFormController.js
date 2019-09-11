@@ -13,6 +13,17 @@
             component.set('v.namespaceFieldPrefix', namespace+'__');
         }
     },
+    handleDataImportChange: function(component, event, helper){
+        let diIndex = component.get('v.diIndexChosen');
+        
+        let diList = component.get('v.diList');
+        let selectedDI = diList[diIndex];
+        let opp = helper.proxyToObj(component.get('v.opp'));
+        helper.mapDiToOpp(component, selectedDI, opp);
+
+        component.set('v.di', selectedDI);
+        component.set('v.opp', opp);
+    },
     handlePaymentChange: function(component, event, helper){
         if(component.get('v.disableBlurEvents')){
             return;
@@ -119,6 +130,9 @@
             helper.setDonation(component, message);
         } else if (channel === 'onError') {
             helper.showErrorToast(message.errorMessage, message.title);
+        } else if(channel == 'deleteRowEvent'){
+            console.log('DELETE'); 
+            helper.validateForm(component, true);
         }
     },
     handleDynamicFormLoaded: function(component, event, helper) {

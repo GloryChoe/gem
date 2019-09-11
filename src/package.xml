@@ -98,7 +98,6 @@
         <members>Gift_Clear_Calculate_Payments</members>
         <members>Gift_Create</members>
         <members>Gift_Credit_Type</members>
-        <members>Gift_Donation_ID_Placeholder</members>
         <members>Gift_Donation_Information</members>
         <members>Gift_Donation_Locked</members>
         <members>Gift_Donation_Locked_Payments</members>

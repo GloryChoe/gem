@@ -108,7 +108,6 @@
                     itemList="{!v.paymentList}"
                     blockItemChangeEvent="{!v.blockItemChangeEvent}"
                     rowCmpName="{!v.rowCmpName}"
-                    oppField="npe01__Opportunity__c"
                     amtField="npe01__Payment_Amount__c"
                     donationAmt="{!v.donationAmt}"
                     preventAmountSurplus="false"

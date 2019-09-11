@@ -21,10 +21,11 @@
     handleJsonUpdate: function(component, event, helper) {
         // Reset the duplicate checking array
         component.set('v.noDuplicateValueList', []);
+        // Returns 'false' if there is a problem, and an array otherwise (which is sometimes empty)
         var validRows = helper.validateRows(component);
         // If there are no rows, the JSON gets overwritten
-        helper.updateModelObject(component, validRows);
-        return validRows;
+        var objectJSON = helper.updateModelObject(component, validRows);
+        return objectJSON;
     },
     handleItemListChange: function(component, event, helper){
         // In the payment scheduler, this event gets called twice so we prevent it one time

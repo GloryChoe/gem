@@ -16,6 +16,7 @@
     <aura:attribute type="sObject[]" name="itemList" />
     <aura:attribute type="sObject[]" name="rowList" default="[]" />
     
+    <aura:attribute type="Map" name="relatedJSON" default="{}" />
     <aura:attribute type="Object" name="giftModel" />
     <aura:attribute type="Map" name="objectFieldData" />
     <aura:attribute type="String" name="sectionTitle" />
@@ -25,7 +26,6 @@
     <aura:attribute type="String" name="rowCmpName" default="c:giftRelatedAllocation" />
     <aura:attribute type="String[]" name="fieldList" />
     <aura:attribute type="String[]" name="noDuplicateValueList" />
-    <aura:attribute type="String" name="oppField" />
     <aura:attribute type="String" name="amtField" />
     <aura:attribute type="Decimal" name="donationAmt" />
     <aura:attribute type="Decimal" name="amountTotal" />

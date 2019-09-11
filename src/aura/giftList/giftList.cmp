@@ -3,7 +3,7 @@
     <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
     
     <aura:attribute name="recordId" type="String" />
-    <aura:attribute name="currentDiId" type="String" />
+    <aura:attribute name="currentDiIndex" type="Integer" default="-1" />
     <aura:attribute name="diBatch" 
         type="npsp__DataImportBatch__c" 
         default="{sobjectType:'npsp__DataImportBatch__c'}"/>
@@ -13,7 +13,26 @@
     <aura:attribute name="giftBatchModel" type="Object"/>
     
     <div class="c-container">
-        <lightning:layout >
+        <lightning:layout multipleRows="true">
+            
+            <lightning:layoutItem size="12">
+                <header role="banner" class="header slds-p-bottom_medium">
+                    <div class="slds-page-header">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-has-flexi-truncate slds-align-middle">
+                                <p>
+                                <aura:if isTrue="{!v.currentDiId}">    
+                                    Currently editing: {!v.currentDiId}
+                                    <aura:set attribute="else">
+                                        Creating a new Gift.
+                                    </aura:set>
+                                </aura:if>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            </lightning:layoutItem>
             
             <lightning:layoutItem size="4">
                 <header role="banner" class="header slds-p-bottom_medium">
@@ -29,7 +48,8 @@
                         </div>
                     </div>
                 </header>
-                <aura:iteration var="di" items="{!v.diList}">
+                <!-- <div class="slds-scrollable" style="height:100%;"> -->
+                <aura:iteration var="di" items="{!v.diList}" indexVar="index">
                     <lightning:card title="{!di.npsp__Donation_Name__c}" 
                                     iconName="standard:opportunity"
                                     class="slds-m-bottom_small">
@@ -37,25 +57,26 @@
                             <button class="slds-button slds-button_neutral"
                                     type="button" 
                                     onclick="{!c.handleEdit}" 
-                                    data-importid="{!di.Id}">
+                                    data-index="{!index}">
                                 Edit Gift
                             </button>
                         </aura:set>
-                        <lightning:recordForm
-                            class="slds-p-around_small"
-                            recordId="{!di.Id}"
-                            objectApiName="npsp__DataImport__c"
-                            layoutType="Compact"
-                            columns="2"
-                            mode="readonly" />
+                        <div class="slds-p-around_small">
+                            <lightning:recordForm
+                                recordId="{!di.Id}" 
+                                objectApiName="npsp__DataImport__c" 
+                                layoutType="Compact" 
+                                columns="2"
+                                mode="readonly" />
+                        </div>
                     </lightning:card>
                 </aura:iteration>
+                <!-- </div> -->
             </lightning:layoutItem>
             
             <lightning:layoutItem class="slds-p-left_small" size="8">
-                <aura:if isTrue="{!v.currentDiId}">
-	                <c:giftEntryForm returnedRecordId="{!v.currentDiId}" />
-                </aura:if>
+                <c:giftEntryForm diList="{!v.diList}" 
+                    diIndexChosen="{!v.currentDiIndex}" />
             </lightning:layoutItem>
             
         </lightning:layout>

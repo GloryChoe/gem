@@ -155,13 +155,6 @@
         <value>Credit Type</value>
     </labels>
     <labels>
-        <fullName>Gift_Donation_ID_Placeholder</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Gift Donation ID Placeholder</shortDescription>
-        <value>OpportunityIdPlaceholder</value>
-    </labels>
-    <labels>
         <fullName>Gift_Donation_Information</fullName>
         <language>en_US</language>
         <protected>true</protected>

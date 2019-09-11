@@ -23,7 +23,6 @@
     <aura:attribute type="String" name="namespacePrefix" />
     <aura:attribute type="String" name="namespaceFieldPrefix" default="" />
 
-    <aura:attribute type="String" name="returnedRecordId" />
     <aura:attribute type="String" name="error" />
     <aura:attribute type="String" name="submitError" />
     <aura:attribute type="String" name="selectedDonorType" />
@@ -50,11 +49,13 @@
     <aura:attribute type="Boolean" name="renderDonorInputs" default="true" />
     <aura:attribute type="Boolean" name="renderRequiredInputs" default="true" />
     <aura:attribute type="Integer" name="paymentTimer" />
+    <aura:attribute type="Integer" name="diIndexChosen" default="-1" />
 
     <aura:handler name="change" value="{!v.opp.AccountId}" action="{!c.onDonorChange}"/>
     <aura:handler name="change" value="{!v.opp.npsp__Primary_Contact__c}" action="{!c.onDonorChange}"/>
     <aura:handler name="change" value="{!v.opp.Amount}" action="{!c.handlePaymentChange}"/>
     <aura:handler name="change" value="{!v.opp.CloseDate}" action="{!c.handlePaymentChange}"/>
+    <aura:handler name="change" value="{!v.diIndexChosen}" action="{!c.handleDataImportChange}"/>
     <aura:handler event="force:showToast" action="{!c.handleToast}"/>
 
     <aura:attribute name="di" 
@@ -74,6 +75,10 @@
         default="[]"/>
     <aura:attribute name="partialCredits" 
         type="npsp__Partial_Soft_Credit__c[]" 
+        default="[]"/>
+    
+    <aura:attribute name="diList" 
+        type="npsp__DataImport__c[]" 
         default="[]"/>
 
     <!--Modal Attributes-->
@@ -294,7 +299,6 @@
                     itemList="{!v.allocs}"
                     objectName="npsp__Allocation__c"
                     rowCmpName="{!v.namespacePrefix+':giftRelatedAllocation'}"
-                    oppField="npsp__Opportunity__c"
                     amtField="npsp__Amount__c"
                     donationAmt="{!v.opp.Amount}"
                     preventAmountSurplus="true"
@@ -311,7 +315,6 @@
                     itemList="{!v.partialCredits}"
                     objectName="npsp__Partial_Soft_Credit__c"
                     rowCmpName="{!v.namespacePrefix+':giftRelatedSoftCredit'}"
-                    oppField="npsp__Opportunity__c"
                     amtField="npsp__Amount__c"
                     donationAmt="{!v.opp.Amount}"
                     preventAmountSurplus="false"

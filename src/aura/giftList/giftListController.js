@@ -14,8 +14,7 @@
         //}
     },
     handleEdit: function(component, event, helper){
-        var diId = event.currentTarget.dataset.importid;
-        //console.log(diId); 
-        component.set("v.currentDiId", diId);
+        var index = event.currentTarget.dataset.index;
+        component.set("v.currentDiIndex", index);
     }
 })

@@ -199,14 +199,17 @@
         component.set('v.checkAmountTotals', true);
     },
     updateModelObject: function(component, arrayList){
-        var attrName = component.get('v.modelAttribute');
+        // var attrName = component.get('v.modelAttribute');
+        var attrName = component.get('v.objectName');
         arrayList = this.proxyToObj(arrayList);
         if(!arrayList){
-            arrayList = null;
+            // arrayList = null;
+            return false;
         }
         // Remove any related object info, it causes errors during JSON parsing in Apex
         for(var i in arrayList){
             var relatedObj = arrayList[i];
+            delete relatedObj['sobjectType'];
             for(var j in relatedObj){
                 var fieldVal = relatedObj[j];
                 if(fieldVal instanceof Object){
@@ -214,7 +217,11 @@
                 }
             }
         }
-        component.set('v.giftModel.'+attrName, arrayList);
+        var relJson = this.proxyToObj(component.get('v.relatedJSON'));
+        relJson[attrName] = arrayList;
+        // component.set('v.giftModel.'+attrName, arrayList);
+        component.set('v.relatedJSON', relJson);
+        return relJson;
     },
     validateRows: function(component){
         var preventSubmit = component.get('v.preventSubmit');
