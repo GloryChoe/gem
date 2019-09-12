@@ -254,6 +254,18 @@ flows:
                    managed: True
                    namespace: hed
 
+    dev_org_pardot:
+        description: Set up an org with Pardot
+        steps:
+            1:
+                task: update_dependencies
+                options:
+                    dependencies:
+                      - namespace: pi
+                        version: 4.49
+            2:
+                flow: dev_org
+
     dev_org_beta_deps:
         description: Set up an org as a development environment for unmanaged metadata based on the latest version (including betas).
         steps:
@@ -440,3 +452,5 @@ orgs:
 
         dev_prerelease:
             config_file: orgs/dev_prerelease.json
+        pardot:
+            config_file: orgs/pardot.json
