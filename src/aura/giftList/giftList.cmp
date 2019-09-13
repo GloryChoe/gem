@@ -28,6 +28,12 @@
                                     </aura:set>
                                 </aura:if>
                                 </p>
+                                <button class="slds-button slds-button_neutral"
+                                    type="button" 
+                                    onclick="{!c.handleNewGift}" 
+                                    data-index="{!index}">
+                                    New Gift
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -76,6 +82,7 @@
             
             <lightning:layoutItem class="slds-p-left_small" size="8">
                 <c:giftEntryForm diList="{!v.diList}" 
+                    diBatchId="{!v.recordId}" 
                     diIndexChosen="{!v.currentDiIndex}" />
             </lightning:layoutItem>
             

@@ -212,9 +212,23 @@
     },
     handleSaveGift: function(component) {
 
-        let curDiIndex = component.get('v.diIndexChosen');
-        if(curDiIndex > -1){
-            console.log('Saving DI record: ' + curDiIndex); 
+        let diBatchId = component.get('v.diBatchId');
+        if(diBatchId != null){
+            // We are in Batch mode
+            let diIndexChosen = component.get('v.diIndexChosen');
+            let diList = component.get('v.diList');
+            let di = component.get('v.di');
+
+            if(diIndexChosen < 0){
+                // This is a new gift
+                diList.push(di);
+            } else {
+                diList[diIndexChosen] = di;
+            }
+
+            console.log(this.proxyToObj(diList)); 
+
+            component.set('v.diList', diList);
             return;
         }
 
@@ -560,8 +574,6 @@
             }
             console.log(relatedJSON); 
             allRowsValid = allRowsValid && (jsonResp != false);
-            console.log('allRowsValid:');
-            console.log(allRowsValid); 
         }
 
         let giftModel = component.get('v.giftModel');
@@ -579,6 +591,8 @@
         let bdiLabels = component.get('v.bdiLabels');
         di[bdiLabels.postProcessJsonField] = JSON.stringify(relatedJSON);
         console.log(di); 
+        // Used by the batch page to store the DataImport record
+        component.set('v.di', di);
         giftModel['di'] = di;
         // Lookup values are converted from array to ID during mapOppToDi, so we need to update
         giftModel['opp'] = opp;

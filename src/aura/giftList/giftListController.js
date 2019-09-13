@@ -16,5 +16,8 @@
     handleEdit: function(component, event, helper){
         var index = event.currentTarget.dataset.index;
         component.set("v.currentDiIndex", index);
+    },
+    handleNewGift: function(component, event, helper){
+        component.set("v.currentDiIndex", -1);
     }
 })

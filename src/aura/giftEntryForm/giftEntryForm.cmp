@@ -23,6 +23,7 @@
     <aura:attribute type="String" name="namespacePrefix" />
     <aura:attribute type="String" name="namespaceFieldPrefix" default="" />
 
+    <aura:attribute type="String" name="diBatchId" />
     <aura:attribute type="String" name="error" />
     <aura:attribute type="String" name="submitError" />
     <aura:attribute type="String" name="selectedDonorType" />
@@ -55,9 +56,12 @@
     <aura:handler name="change" value="{!v.opp.npsp__Primary_Contact__c}" action="{!c.onDonorChange}"/>
     <aura:handler name="change" value="{!v.opp.Amount}" action="{!c.handlePaymentChange}"/>
     <aura:handler name="change" value="{!v.opp.CloseDate}" action="{!c.handlePaymentChange}"/>
-    <aura:handler name="change" value="{!v.diIndexChosen}" action="{!c.handleDataImportChange}"/>
+    <aura:handler name="change" value="{!v.diIndexChosen}" action="{!c.handleDiSelectionChange}"/>
     <aura:handler event="force:showToast" action="{!c.handleToast}"/>
 
+    <aura:attribute name="newDi" 
+        type="npsp__DataImport__c" 
+        default="{sobjectType:'npsp__DataImport__c'}"/>
     <aura:attribute name="di" 
         type="npsp__DataImport__c" 
         default="{sobjectType:'npsp__DataImport__c'}"/>
@@ -78,8 +82,7 @@
         default="[]"/>
     
     <aura:attribute name="diList" 
-        type="npsp__DataImport__c[]" 
-        default="[]"/>
+        type="npsp__DataImport__c[]" />
 
     <!--Modal Attributes-->
     <aura:attribute name="donationModalHeader" type="Aura.ComponentDefRef[]" description="Formatted header text used in donation modal.">
@@ -92,6 +95,8 @@
         <lightning:spinner class="slds-is-fixed" />
     </aura:if>
     <aura:if isTrue="{!v.showForm}">
+
+        <aura:if isTrue="{!v.diBatchId == null}">
         <header role="banner" class="header slds-p-bottom_medium">
             <div class="slds-page-header">
                 <div class="slds-grid">
@@ -105,6 +110,8 @@
                 </div>
             </div>
         </header>
+        </aura:if>
+
         <div class="outerDivContainer">
         <div class="slds-card" aura:id="formWrapper">
             <lightning:recordEditForm objectApiName="Opportunity"
