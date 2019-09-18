@@ -46,14 +46,17 @@ export default class SGE_FormField extends LightningElement {
     set sobject(value){
         this.setAttribute('sobject', value);
         this._sobject = value;
+        this.renderField = false;
         this.value = this.sobject[this.field.name];
     }
     @api disableInputs;
     @api field = {};
     @track value;
+    @track renderField = false;
 
-    connectedCallback() {
+    renderedCallback() {
         this.value = this.sobject[this.field.name];
+        this.renderField = true;
     }
 
     /**
@@ -86,6 +89,10 @@ export default class SGE_FormField extends LightningElement {
         let data = {};
         data[this.field.name] = field.value;
         return data;
+    }
+
+    get loaded(){
+        return !!this.field && this.renderField;
     }
 
     getRawField() {

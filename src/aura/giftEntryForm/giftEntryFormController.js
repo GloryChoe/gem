@@ -22,15 +22,21 @@
         } else {
             selectedDI = diList[diIndex];
         }
-        
+
+        // Merge the hardcoded and custom field sections into one opp object
         let opp = helper.proxyToObj(component.get('v.opp'));
-        helper.mapDiToOpp(component, selectedDI, opp);
+        const customFieldValues = helper.getCustomFieldValues(component);
+        let mergedOpp = Object.assign({}, opp, customFieldValues);
 
+        // Clear all field values to reset the form
+        for(var field in mergedOpp){
+            mergedOpp[field] = null;
+        }
+
+        // Map the Data Import fields to their respective Opp fields to display them in the form
+        helper.mapDiToOpp(component, selectedDI, mergedOpp);
         component.set('v.di', selectedDI);
-        component.set('v.opp', opp);
-
-        // TODO: Clear?
-        this.getDonationInformation(component, null);
+        component.set('v.opp', mergedOpp);
     },
     handlePaymentChange: function(component, event, helper){
         if(component.get('v.disableBlurEvents')){

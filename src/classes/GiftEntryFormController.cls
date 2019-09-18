@@ -72,6 +72,24 @@ public with sharing class GiftEntryFormController {
         }
     }
 
+    public class GiftBatchModel {
+        @AuraEnabled public Id batchId {get;set;}
+        @AuraEnabled public npsp__DataImportBatch__c diBatch {get;set;}
+        @AuraEnabled public List<npsp__DataImport__c> diList {get;set;}
+        @AuraEnabled public Map<String, String> bdiLabels;
+
+        public GiftBatchModel() {
+            this.diBatch = new npsp__DataImportBatch__c();
+            this.diList = new List<npsp__DataImport__c>();
+            this.bdiLabels = batchDataImportLabels;
+        }
+
+        public GiftBatchModel(Id batchId) {
+            this();
+            this.batchId = batchId;
+        }
+    }
+
     /******************************************************************************************************
     * @description Map helper property for getClosedWonStageMap() method.
     *******************************************************************************************************/
@@ -714,7 +732,7 @@ public with sharing class GiftEntryFormController {
         }
     }
 
-    // Not currently used, but useful for processing a large number of DataImport objects
+    // Used to process a batch of Data Import records
     @AuraEnabled
     public static Id runGiftBatch(Id batchId) {
         if(batchId != null) {
@@ -760,6 +778,20 @@ public with sharing class GiftEntryFormController {
         } catch(Exception e) {
             throw returnAuraException(e.getMessage());
         }
+    }
+
+    @AuraEnabled
+    public static void deleteDiRecord(String diId) {
+        npsp__DataImport__c diRecord = [SELECT Id FROM npsp__DataImport__c WHERE Id =: diId];
+        delete diRecord;
+    }
+
+    @AuraEnabled
+    public static Id saveDiRecord(String diJSON) {
+        Type diType = Type.forName('npsp__DataImport__c');
+        npsp__DataImport__c diRecord = (npsp__DataImport__c)System.JSON.deserialize(diJSON, diType);
+        upsert diRecord;
+        return diRecord.Id;
     }
 
     @AuraEnabled
@@ -908,22 +940,6 @@ public with sharing class GiftEntryFormController {
     }
 
     public class FieldNotMappedException extends Exception {}
-
-    public class GiftBatchModel {
-        @AuraEnabled public Id batchId {get;set;}
-        @AuraEnabled public npsp__DataImportBatch__c diBatch {get;set;}
-        @AuraEnabled public List<npsp__DataImport__c> diList {get;set;}
-
-        public GiftBatchModel() {
-            this.diBatch = new npsp__DataImportBatch__c();
-            this.diList = new List<npsp__DataImport__c>();
-        }
-
-        public GiftBatchModel(Id batchId) {
-            this();
-            this.batchId = batchId;
-        }
-    }
 
     @AuraEnabled
     public static GiftBatchModel initBatch(Id batchId) {

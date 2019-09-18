@@ -211,28 +211,62 @@
         event.fire();
     },
     handleSaveGift: function(component) {
-
+        component.set('v.showSpinner', true);
         let diBatchId = component.get('v.diBatchId');
         if(diBatchId != null){
-            // We are in Batch mode
-            let diIndexChosen = component.get('v.diIndexChosen');
-            let diList = component.get('v.diList');
-            let di = component.get('v.di');
-
-            if(diIndexChosen < 0){
-                // This is a new gift
-                diList.push(di);
-            } else {
-                diList[diIndexChosen] = di;
-            }
-
-            console.log(this.proxyToObj(diList)); 
-
-            component.set('v.diList', diList);
-            return;
+            this.saveBatchedGift(component, diBatchId);
+        } else {
+            this.saveSingleGift(component);
         }
+    },
+    saveBatchedGift: function(component, diBatchId){
 
-        component.set('v.showSpinner', true);
+        let diObj = this.proxyToObj(component.get('v.di'));
+        // Prepare the DI record for upsert
+        delete diObj['sobjectType'];
+        diObj['npsp__NPSP_Data_Import_Batch__c'] = diBatchId;
+        // Work around for displaying the gift name
+        diObj['npsp__Donation_Name__c'] = diObj['npsp__donation_name__c'];
+        delete diObj['npsp__donation_name__c'];
+
+        let action = component.get('c.saveDiRecord');
+        let diJSON = JSON.stringify(diObj);
+        console.log(diJSON); 
+        action.setParams({
+            diJSON: diJSON
+        });
+
+        action.setCallback(this, function(response) {
+            var state = response.getState();
+            component.set('v.showSpinner', false);
+            if (state === 'SUCCESS') {
+                let diId = response.getReturnValue();
+                diObj['Id'] = diId;
+
+                let diIndexChosen = component.get('v.diIndexChosen');
+                let diList = component.get('v.diList');
+
+                if(diIndexChosen < 0){
+                    // This is a new gift
+                    diList.push(diObj);
+                } else {
+                    // Saving an existing gift
+                    diList[diIndexChosen] = diObj;
+                }
+                console.log(this.proxyToObj(diList)); 
+                component.set('v.diList', diList);
+
+                this.showSaveToast($A.get('$Label.c.Gift_Save_Message_Title'), 
+                    $A.get('$Label.c.Gift_Save_Message_Detail'));
+
+            } else if (state === 'ERROR') {
+                this.handleError(component, response);
+            }
+        });
+
+        $A.enqueueAction(action);
+    },
+    saveSingleGift: function(component){
         var action = component.get('c.saveGift');
         var giftModelString = component.get('v.giftModelString');
         action.setParams({
@@ -255,7 +289,6 @@
         });
 
         $A.enqueueAction(action);
-
     },
     checkValidation: function(component) {
         this.validateForm(component);
@@ -572,7 +605,7 @@
                     }
                 }
             }
-            console.log(relatedJSON); 
+            // console.log(relatedJSON); 
             allRowsValid = allRowsValid && (jsonResp != false);
         }
 
@@ -632,16 +665,23 @@
         var formWrapper = component.find('formWrapper');
         return formWrapper.find({instancesOf:rowCmpName});
     },
+    clearAllInputs: function(component){
+        // TODO: Doesn't work for lightning:textarea, etc.
+        let inputs = this.getInputs(component);
+        for(var i in inputs){
+            var field = inputs[i];
+            field.set('v.value', '');
+        }
+    },
+    getInputs: function(component){
+        var formWrapper = component.find('formWrapper');
+        return formWrapper.find({ instancesOf : 'lightning:input' });
+    },
     scrollToTop: function() {
         window.scrollTo(0, 0);
     },
     preventDefaultPayment: function() {
-		var sendMsgEvent = $A.get('e.ltng:sendMessage');
-		sendMsgEvent.setParams({
-            'message': 'npe01__OppPayment__c',
-			'channel': 'addRowEvent'
-		});
-		sendMsgEvent.fire();
+        this.sendMessage('addRowEvent', 'npe01__OppPayment__c');
     },
     sendMessage: function(channel, message) {
 		var sendMsgEvent = $A.get('e.ltng:sendMessage');

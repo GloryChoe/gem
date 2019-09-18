@@ -8,26 +8,21 @@
         });
         
         action.setCallback(this, function(response) {
-            
             var state = response.getState();
-            console.log(state);
             if (state === 'SUCCESS') {
-                
                 var giftBatchModel = response.getReturnValue();
                 component.set('v.giftBatchModel', giftBatchModel);
+                component.set('v.bdiLabels', giftBatchModel.bdiLabels);
                 component.set('v.diBatch', giftBatchModel.diBatch);
-                console.log(giftBatchModel.diList);
                 component.set('v.diList', giftBatchModel.diList);
-                
             } else if (state === 'ERROR') {
-                //component.set('v.showForm', false);
+                // TODO: Send event with error message for giftEntry component to handle?
                 //this.handleError(component, response);
-                //component.set('v.showSpinner', false);
             }
         
         });
         
         $A.enqueueAction(action);
 		
-	}
+    }
 })
