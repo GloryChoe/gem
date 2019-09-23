@@ -1,12 +1,9 @@
 ({
     getBatchInformation : function(component, batchId) {
-        
         var action = component.get('c.initBatch');
-        
         action.setParams({
             batchId: batchId
         });
-        
         action.setCallback(this, function(response) {
             var state = response.getState();
             if (state === 'SUCCESS') {
@@ -19,10 +16,7 @@
                 // TODO: Send event with error message for giftEntry component to handle?
                 //this.handleError(component, response);
             }
-        
         });
-        
         $A.enqueueAction(action);
-		
     }
 })

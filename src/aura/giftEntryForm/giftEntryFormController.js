@@ -145,7 +145,6 @@
         } else if (channel === 'onError') {
             helper.showErrorToast(message.errorMessage, message.title);
         } else if(channel == 'deleteRowEvent'){
-            console.log('DELETE'); 
             helper.validateForm(component, true);
         }
     },
