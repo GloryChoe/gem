@@ -30,9 +30,12 @@
         <members>UTIL_Namespace</members>
         <members>UTIL_Namespace_TEST</members>
         <members>UTIL_UnitTestData_TEST</members>
+        <members>customLookupController</members>
         <name>ApexClass</name>
     </types>
     <types>
+        <members>customLookup</members>
+        <members>customLookupResult</members>
         <members>dynamicFieldDisplay</members>
         <members>dynamicFieldDisplaySection</members>
         <members>giftEntryForm</members>
@@ -43,6 +46,10 @@
         <members>giftRelatedAllocation</members>
         <members>giftRelatedPayment</members>
         <members>giftRelatedSoftCredit</members>
+        <members>lookupSpikeApp</members>
+        <members>lookupSpikeComponent</members>
+        <members>selectedSobjectRecordEvent</members>
+        <members>testApp</members>
         <name>AuraDefinitionBundle</name>
     </types>
     <types>

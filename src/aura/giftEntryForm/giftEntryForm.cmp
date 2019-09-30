@@ -145,6 +145,7 @@
                                         variant="label-hidden"
                                         fieldName="npsp__Primary_Contact__c"
                                         value="{!v.opp.npsp__Primary_Contact__c}" />
+
                                 </aura:if>
                             </div>
                         </lightning:layoutItem>

@@ -1,0 +1,28 @@
+<!--
+ - Created by kiet.truong on 9/25/2019.
+ -->
+
+<aura:component description="lookupSpikeComponent" >
+    <div class="slds-p-bottom_large slds-p-left_large" style="width:500px">
+        <lightning:recordEditForm aura:id="recordViewForm"
+                                  objectApiName="Contact">
+            <!--Other fields here-->
+            <lightning:inputField fieldName="AccountId" />
+        </lightning:recordEditForm>
+    </div>
+
+    ------------------------------------------------
+    <aura:attribute name="contact" type="Contact"
+                    default="{ 'sobjectType': 'Contact' }"/>
+    <force:inputField value="{!v.contact.AccountId}"/>
+
+    -------------------------------------------------
+    <div onkeyup="{! c.handleKeyUp }">
+        <lightning:input
+                aura:id="enter-search"
+                name="enter-search"
+                label="Search when user hits the 'enter' key"
+                type="search"
+        />
+    </div>
+</aura:component>
