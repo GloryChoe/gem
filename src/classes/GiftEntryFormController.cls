@@ -253,10 +253,17 @@ public with sharing class GiftEntryFormController {
     */
     private static GiftFormModel getDonationRecords(GiftFormModel giftModel) {
         try {
+            Id defaultGAUId;
             Id oppId = giftModel.oppId;
             if(oppId == null) {
                 return giftModel;
             }
+
+            npsp__Allocations_Settings__c allocationsSettings = SGE_GiftEntryService.readAllocationSettings();
+            if(allocationsSettings.npsp__Default_Allocations_Enabled__c == true) {
+                defaultGAUId = allocationsSettings.npsp__Default__c;
+            }
+
 
             String allOppFields = UTIL_Describe.getAllFieldsQueryStringFromObject('Opportunity');
             // Data Import uses the Record Type name instead of ID, so we need to set that before processing
@@ -336,6 +343,7 @@ public with sharing class GiftEntryFormController {
                             npsp__Opportunity__c
                     FROM npsp__Allocation__c
                     WHERE npsp__Opportunity__c = :oppId
+                        AND npsp__General_Accounting_Unit__c != :defaultGAUId
             ];
             if(!allocations.isEmpty()) {
                 giftModel.allocs = allocations;
@@ -440,7 +448,7 @@ public with sharing class GiftEntryFormController {
             }
 
             if(oppId == null){
-                throw returnAuraException('No Opportunity was created or matched');
+                throw returnAuraException(System.Label.Error_Opportunity_Not_Created);
             }
 
             if(giftModel.allocs != null && !giftModel.allocs.isEmpty()){
@@ -554,7 +562,7 @@ public with sharing class GiftEntryFormController {
 
             return JSON.serialize(opportunityWrappers);
         } catch (Exception ex){
-            throw new AuraHandledException('ERROR: ' + ex.getMessage());
+            throw new AuraHandledException(System.Label.Error + ': ' + ex.getMessage());
         }
     }
 
@@ -734,15 +742,14 @@ public with sharing class GiftEntryFormController {
     // Not currently used, but useful for processing a large number of DataImport objects
     @AuraEnabled
     public static Id runGiftBatch(Id batchId) {
-        if(batchId != null) {
+        try {
             List<npsp.BDI_DataImport_API.ProcessDataImportBatchesResult> batchesResults =
                 new List<npsp.BDI_DataImport_API.ProcessDataImportBatchesResult>();
             List<Id> listBatchId = new List<Id>{batchId};
             batchesResults = npsp.BDI_DataImport_API.processDataImportBatches(listBatchId);
             return batchesResults[0].apexJobId;
-        } else {
-            System.debug('No Data Import Settings were found');
-            return null;
+        } catch(Exception e) {
+            throw returnAuraException(e.getMessage());
         }
     }
 

@@ -50,10 +50,20 @@ public with sharing class SGE_GiftEntryService {
         return readOpportunityLayoutByName(UTIL_Namespace.StrTokenNSPrefix(LAYOUT_NAME));
     }
 
+    /**
+     * Read the data import field mappings via the NPSP API
+     *
+     * @return Map<String, String> of DataImport fields to underlying object fields (eg, Donation_Amount__c => Amount)
+     */
     @AuraEnabled(cacheable=true)
     public static Map<String, String> getDataImportFieldMappings() {
         List<String> dataImportFields = npsp.BDI_DataImportService.listStrDataImportFields;
         return npsp.BDI_DataImportService.mapFieldsForDIObject('Opportunity', 'Opportunity', dataImportFields);
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static npsp__Allocations_Settings__c readAllocationSettings() {
+        return npsp.UTIL_CustomSettings_API.getAllocationsSettings();
     }
 
     /**
@@ -71,7 +81,7 @@ public with sharing class SGE_GiftEntryService {
         try {
             rawMetadata = Metadata.Operations.retrieve(Metadata.MetadataType.Layout, layouts)[0];
         } catch(Exception ex) {
-            throw new AuraHandledException('No Opportunity layout named ' + layoutName + ' found');
+            throw new AuraHandledException(System.Label.Error_Layout_Not_Found + ': ' + layoutName);
         }
         Metadata.Layout layout = (Metadata.Layout)rawMetadata;
 
