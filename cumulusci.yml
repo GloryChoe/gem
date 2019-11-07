@@ -438,6 +438,12 @@ flows:
           7:
               task: deploy_trial_config
 
+    regression_tests:
+        steps:
+            1:
+                flow: install_prod_with_abacus
+            2:
+                flow: abacus:regression_tests
 
     # Temporary workaround for deployment issue introduced in 1c00b3c
     deploy_packaging:
