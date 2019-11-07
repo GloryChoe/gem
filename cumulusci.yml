@@ -1,3 +1,4 @@
+minimum_cumulusci_version: 3.1.0
 project:
     dependencies:
         - github: https://github.com/SalesforceFoundation/Cumulus
@@ -12,6 +13,12 @@ project:
         prefix_release: rel/gem/
         prefix_beta: beta/gem/
         repo_url: https://github.com/SalesforceFoundation/gem
+
+sources:
+    abacus:
+        github: https://github.com/SalesforceFoundation/Abacus
+    npsp:
+        github: https://github.com/SalesforceFoundation/Cumulus
 
 tasks:
     deploy_abacus_settings:
