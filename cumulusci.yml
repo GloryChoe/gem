@@ -17,6 +17,8 @@ project:
 sources:
     abacus:
         github: https://github.com/SalesforceFoundation/Abacus
+    EDA:
+        github: https://github.com/SalesforceFoundation/EDA
     npsp:
         github: https://github.com/SalesforceFoundation/Cumulus
 
