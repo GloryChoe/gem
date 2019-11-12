@@ -459,6 +459,8 @@ flows:
                     - when: "tasks.opp_record_types_exist()"
                       action: skip
                       message: Skipped because Opportunity record types already exist.
+                ui_options:
+                    is_required: False
                 options:
                     unmanaged: False
             9:
