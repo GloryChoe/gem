@@ -26,10 +26,16 @@ class CheckExistingRecordTypes(BaseSalesforceApiTask):
                 rt for rt in record_types if rt["developerName"] not in ignored_names
             ]
         recordtypes_exist = len(record_types) > 0
+        self.logger.info(
+            f"Existing record types on {sobject} {'not ' if not recordtypes_exist else ''}found."
+        )
 
         business_process_result = self.tooling.query(
             "SELECT Id FROM BusinessProcess WHERE Name = 'NPSP_Default'"
         )
         business_process_exists = business_process_result["size"] > 0
+        self.logger.info(
+            f"Existing NPSP_Default BusinessProcess on {sobject} {'not ' if not business_process_exists  else ''}found."
+        )
 
         self.return_values = business_process_exists and not recordtypes_exist
