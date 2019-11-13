@@ -32,4 +32,4 @@ class CheckExistingRecordTypes(BaseSalesforceApiTask):
         )
         business_process_exists = business_process_result["size"] > 0
 
-        self.return_values = business_process_exists and recordtypes_exist
+        self.return_values = business_process_exists and not recordtypes_exist
