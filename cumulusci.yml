@@ -457,7 +457,7 @@ flows:
                 task: deploy_opp_record_types
                 checks:
                     - when: "tasks.opp_record_types_exist()"
-                      action: skip
+                      action: hide
                       message: Skipped because Opportunity record types already exist.
                 ui_options:
                     is_required: False
