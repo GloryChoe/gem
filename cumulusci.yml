@@ -59,22 +59,14 @@ tasks:
             unmanaged: True
 
     deploy_opp_record_types:
-        description: Checks for existing Opportunity record types, deploys GEM Record Types if not found.
-        class_path: tasks.check_recordtypes.CheckExistingRecordTypes
-        group: Custom Tasks
+        description: Deploys GEM Opportunity Record Types.
+        class_path: cumulusci.tasks.salesforce.Deploy
         ui_options:
             name: Deploy GEM Opportunity Record Types
         options:
             namespace_inject: $project_config.project__package__namespace
             path: unpackaged/config/opportunity_record_types
             unmanaged: True
-            sobject: Opportunity
-            ignored_record_types: NPSP_Default
-            filtered_record_types:
-                - Donation
-                - Grant
-                - InKindGift
-                - Matching
 
     deploy_qa_config:
         description: Deploys QA configuration. Assigns page layouts, compact layouts, and sets tab visibilities.
@@ -192,6 +184,13 @@ tasks:
             path: scripts/configure_default_settings.cls
             apex: AddGiftProcessor();
 
+    opp_record_types_exist:
+        description: Checks for existing Opportunity record types, returns True if found.
+        class_path: tasks.check_recordtypes.CheckExistingRecordTypes
+        group: Custom Tasks
+        options:
+            sobject: Opportunity
+            ignored_record_types: NPSP_Default
 
     npm_install:
         description: Intsalls npm dependencies with npm install
@@ -456,6 +455,10 @@ flows:
                             name: EDA - Facility Display Name Formula Field
             8:
                 task: deploy_opp_record_types
+                checks:
+                    - when: "not tasks.opp_record_types_exist()"
+                      action: hide
+                      message: Skipped because Opportunity record types already exist.
                 ui_options:
                     is_required: False
                 options:
@@ -475,6 +478,9 @@ flows:
                 checks:
                     - when: "'hed' in tasks.get_installed_packages()"
                       action: hide
+                    - when: "not tasks.opp_record_types_exist()"
+                      action: hide
+                      message: Skipped because Opportunity record types already exist.
             12:
                 task: execute_installer_settings
                 options:
