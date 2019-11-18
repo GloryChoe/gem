@@ -59,14 +59,22 @@ tasks:
             unmanaged: True
 
     deploy_opp_record_types:
-        description: Deploys GEM Opportunity Record Types.
-        class_path: cumulusci.tasks.salesforce.Deploy
+        description: Checks for existing Opportunity record types, deploys GEM Record Types if not found.
+        class_path: tasks.check_recordtypes.CheckExistingRecordTypes
+        group: Custom Tasks
         ui_options:
             name: Deploy GEM Opportunity Record Types
         options:
             namespace_inject: $project_config.project__package__namespace
             path: unpackaged/config/opportunity_record_types
             unmanaged: True
+            sobject: Opportunity
+            ignored_record_types: NPSP_Default
+            filtered_record_types:
+                - Donation
+                - Grant
+                - InKindGift
+                - Matching
 
     deploy_qa_config:
         description: Deploys QA configuration. Assigns page layouts, compact layouts, and sets tab visibilities.
@@ -184,13 +192,6 @@ tasks:
             path: scripts/configure_default_settings.cls
             apex: AddGiftProcessor();
 
-    opp_record_types_exist:
-        description: Checks for existing Opportunity record types, returns True if found.
-        class_path: tasks.check_recordtypes.CheckExistingRecordTypes
-        group: Custom Tasks
-        options:
-            sobject: Opportunity
-            ignored_record_types: NPSP_Default
 
     npm_install:
         description: Intsalls npm dependencies with npm install
@@ -455,10 +456,6 @@ flows:
                             name: EDA - Facility Display Name Formula Field
             8:
                 task: deploy_opp_record_types
-                checks:
-                    - when: "tasks.opp_record_types_exist()"
-                      action: hide
-                      message: Skipped because Opportunity record types already exist.
                 ui_options:
                     is_required: False
                 options:
@@ -517,78 +514,7 @@ plans:
         description: Installs the Gift Entry Manager
         steps:
             1:
-                task: npsp:update_dependencies
-            2:
-                task: npsp:deploy
-                options:
-                    path: unpackaged/pre/account_record_types
-                ui_options:
-                    name: NPSP - Account Record Types
-            3:
-                task: npsp:ensure_record_type
-                ui_options:
-                    name: NPSP - Opportunity Record Types
-            4:
-                task: npsp:install_managed
-            5:
-                task: npsp:deploy_post
-                options:
-                    unmanaged: False
-                ui_options:
-                    first:
-                        name: NPSP - Config for Salesforce Mobile App
-            6:
-                task: abacus:install_managed
-            7:
-                flow: EDA:install_prod_no_config
-                ui_options:
-                    deploy_pre:
-                        acc_record_types:
-                            name: EDA - Account Record Types
-                        contact_key_affl_fields:
-                            name: EDA - Contact Key Affiliation Fields
-                    deploy_post:
-                        case_behavior_record_types:
-                            name: EDA - Deploy Case Behavior Record Types
-                        course_connection_record_types:
-                            name: EDA - Deploy Course Connection Record Types
-                        facility_display_name:
-                            name: EDA - Facility Display Name Formula Field
-            8:
-                task: deploy_opp_record_types
-                checks:
-                    - when: "tasks.opp_record_types_exist()"
-                      action: hide
-                      message: Skipped because Opportunity record types already exist.
-                ui_options:
-                    is_required: False
-                options:
-                    unmanaged: False
-            9:
-                task: install_managed
-                options:
-                    unmanaged: False
-            10:
-                task: deploy_installer_config
-                options:
-                    unmanaged: False
-            11:
-                task: deploy_dev_config
-                options:
-                    unmanaged: False
-                checks:
-                    - when: "'hed' in tasks.get_installed_packages()"
-                      action: hide
-            12:
-                task: execute_installer_settings
-                options:
-                    managed: True
-            13:
-                task: deploy_abacus_settings
-                options:
-                    managed: True
-            14:
-                task: deploy_trial_config
+                flow: existing_org
         checks:
             - when: "org_config.organization_sobject['SignupCountryIsoCode'] != 'US'"
               action: error
