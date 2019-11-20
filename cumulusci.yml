@@ -456,7 +456,7 @@ flows:
             8:
                 task: deploy_opp_record_types
                 checks:
-                    - when: "not tasks.opp_record_types_exist()"
+                    - when: "tasks.opp_record_types_exist()"
                       action: hide
                       message: Skipped because Opportunity record types already exist.
                 ui_options:
@@ -472,7 +472,7 @@ flows:
                 options:
                     unmanaged: False
                 checks:
-                    - when: "not tasks.opp_record_types_exist()"
+                    - when: "tasks.opp_record_types_exist()"
                       action: hide
                       message: Skipped because Opportunity record types already exist.
             11:
@@ -482,11 +482,15 @@ flows:
                 checks:
                     - when: "'hed' in tasks.get_installed_packages()"
                       action: hide
-                    - when: "not tasks.opp_record_types_exist()"
+                    - when: "tasks.opp_record_types_exist()"
                       action: hide
                       message: Skipped because Opportunity record types already exist.
             12:
                 task: execute_installer_settings
+                checks:
+                    - when: "tasks.opp_record_types_exist()"
+                      action: hide
+                      message: Skipped because Opportunity record types already exist.
                 options:
                     managed: True
             13:
