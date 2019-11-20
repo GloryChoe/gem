@@ -471,6 +471,10 @@ flows:
                 task: deploy_installer_config
                 options:
                     unmanaged: False
+                checks:
+                    - when: "not tasks.opp_record_types_exist()"
+                      action: hide
+                      message: Skipped because Opportunity record types already exist.
             11:
                 task: deploy_dev_config
                 options:
