@@ -191,6 +191,11 @@ tasks:
         options:
             sobject: Opportunity
             ignored_record_types: NPSP_Default
+            filtered_record_types:
+                - Donation
+                - Grant
+                - InKindGift
+                - Matching
 
     npm_install:
         description: Intsalls npm dependencies with npm install
