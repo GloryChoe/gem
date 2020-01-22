@@ -2,10 +2,31 @@
     "compilerOptions": {
         "experimentalDecorators": true,
         "baseUrl": ".",
-        "paths": {}
+        "paths": {
+            "c/sge_defaultGau": [
+                "sge_defaultGau/sge_defaultGau.js"
+            ],
+            "c/sge_dynamicForm": [
+                "sge_dynamicForm/sge_dynamicForm.js"
+            ],
+            "c/sge_formField": [
+                "sge_formField/sge_formField.js"
+            ],
+            "c/sge_formSection": [
+                "sge_formSection/sge_formSection.js"
+            ],
+            "c/sge_service": [
+                "sge_service/sge_service.js"
+            ]
+        }
     },
     "include": [
         "**/*",
         "../../.sfdx/typings/lwc/**/*.d.ts"
-    ]
+    ],
+    "typeAcquisition": {
+        "include": [
+            "jest"
+        ]
+    }
 }
